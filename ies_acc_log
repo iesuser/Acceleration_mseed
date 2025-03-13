@@ -1,0 +1,79 @@
+
+
+[2024-07-23 16:23:49] [245173] ფუნქცია get_satations წარმატებით დასრულდა.
+
+
+[2024-07-23 16:23:51] [245173] ფუნქცია compare_stations წარმატებით დასრულდა.
+[2024-07-23 16:23:51] [245173] ფუნქცია get_Distance_between_station_and_earthquake წარმატებით დასრულდა. 
+
+[2024-07-23 16:23:55] [245173] Subdirectory created successfully.
+
+[2024-07-23 16:23:57] [245173] Subdirectory created successfully.
+[2024-07-23 16:23:59] [245173] Subdirectory created successfully.
+[2024-07-23 16:27:27] [245614] ფუნქცია get_satations წარმატებით დასრულდა.
+[2024-07-23 16:27:28] [245614] ფუნქცია compare_stations წარმატებით დასრულდა.
+[2024-07-23 16:27:28] [245614] ფუნქცია get_Distance_between_station_and_earthquake წარმატებით დასრულდა. 
+[2024-07-23 16:29:16] [245856] ფუნქცია get_satations წარმატებით დასრულდა.
+[2024-07-23 16:29:17] [245856] ფუნქცია compare_stations წარმატებით დასრულდა.
+[2024-07-23 16:29:17] [245856] ფუნქცია get_Distance_between_station_and_earthquake წარმატებით დასრულდა. 
+[2024-07-23 16:30:21] [246007] ფუნქცია get_satations წარმატებით დასრულდა.
+[2024-07-23 16:30:22] [246007] ფუნქცია compare_stations წარმატებით დასრულდა.
+[2024-07-23 16:30:22] [246007] ფუნქცია get_Distance_between_station_and_earthquake წარმატებით დასრულდა. 
+[2024-07-23 16:30:24] [246007] Subdirectory created successfully.
+[2024-07-23 16:30:24] [246007] Subdirectory created successfully.
+[2024-07-23 16:30:25] [246007] Subdirectory created successfully.
+
+
+[2024-07-23 16:36:10] [246746] ფუნქცია get_satations წარმატებით დასრულდა.
+[2024-07-23 16:36:11] [246746] ფუნქცია compare_stations წარმატებით დასრულდა.
+[2024-07-23 16:36:11] [246746] ფუნქცია get_Distance_between_station_and_earthquake წარმატებით დასრულდა. 
+[2024-07-23 16:36:15] [246746] Subdirectory created successfully.
+
+
+
+[2024-10-16 17:02:41] [16790] ფუნქცია get_satations წარმატებით დასრულდა.
+
+[2024-10-16 17:19:47] [17300] ფუნქცია get_satations წარმატებით დასრულდა.
+
+
+
+
+[2024-10-17 11:17:09] [6339] ფუნქცია get_satations წარმატებით დასრულდა.
+
+[2024-10-17 11:18:07] [6456] ფუნქცია get_satations წარმატებით დასრულდა.
+
+[2024-10-17 11:23:53] [6736] ფუნქცია get_satations წარმატებით დასრულდა.
+
+[2024-10-17 11:36:44] [6970] ფუნქცია get_satations წარმატებით დასრულდა.
+
+[2024-10-17 11:50:08] [8738] ფუნქცია get_satations წარმატებით დასრულდა.
+
+[2024-10-17 12:07:34] [9254] ფუნქცია get_stations წარმატებით დასრულდა.
+
+
+[2024-10-17 12:07:34] [9254] ფუნქცია compare_stations წარმატებით დასრულდა.
+[2024-10-17 12:07:34] [9254] ფუნქცია get_distance_between_station_and_earthquake წარმატებით დასრულდა.
+[2024-10-17 12:16:32] [9637] ფუნქცია get_stations წარმატებით დასრულდა.
+
+[2024-10-17 12:16:32] [9637] ფუნქცია get_distance_between_station_and_earthquake წარმატებით დასრულდა.
+[2024-10-17 12:17:11] [9769] ფუნქცია get_stations წარმატებით დასრულდა.
+[2024-10-17 12:17:11] [9769] შეცდომა dump xml თან დაკაშირების დროს: 
+[2024-10-17 12:17:11] [9769] ფუნქცია get_distance_between_station_and_earthquake წარმატებით დასრულდა.
+[2024-10-17 12:20:22] [9883] ფუნქცია get_stations წარმატებით დასრულდა.
+[2024-10-17 12:20:22] [9883] შეცდომა dump xml თან დაკაშირების დროს
+[2024-10-17 12:20:22] [9883] ფუნქცია get_distance_between_station_and_earthquake წარმატებით დასრულდა.
+[2024-10-17 12:24:01] [10010] ფუნქცია get_stations წარმატებით დასრულდა.
+[2024-10-17 12:24:01] [10010] შეცდომა dump xml თან დაკაშირების დროს[Errno 2] No such file or directory: 'scxmldump'
+[2024-10-17 12:24:01] [10010] ფუნქცია get_distance_between_station_and_earthquake წარმატებით დასრულდა.
+[2024-10-17 12:25:30] [10161] ფუნქცია get_stations წარმატებით დასრულდა.
+[2024-10-17 12:25:30] [10161] შეცდომა dump xml თან დაკაშირების დროს: [Errno 2] No such file or directory: 'scxmldump'
+[2024-10-17 12:25:30] [10161] ფუნქცია get_distance_between_station_and_earthquake წარმატებით დასრულდა.
+[2024-10-17 12:25:45] [10220] ფუნქცია get_stations წარმატებით დასრულდა.
+[2024-10-17 12:25:45] [10220] შეცდომა dump xml თან დაკაშირების დროს: [Errno 2] No such file or directory: 'scxmldump'
+[2024-10-17 12:25:45] [10220] ფუნქცია get_distance_between_station_and_earthquake წარმატებით დასრულდა.
+[2024-10-17 12:32:59] [10468] ფუნქცია get_stations წარმატებით დასრულდა.
+[2024-10-17 12:32:59] [10468] შეცდომა dump xml თან დაკაშირების დროს: [Errno 2] No such file or directory: 'scxmldump'
+[2024-10-17 12:32:59] [10468] ფუნქცია get_distance_between_station_and_earthquake წარმატებით დასრულდა.
+[2024-10-17 12:40:06] [10720] ფუნქცია get_stations წარმატებით დასრულდა.
+[2024-10-17 12:40:06] [10720] შეცდომა dump xml თან დაკაშირების დროს: [Errno 2] No such file or directory: 'scxmldump'
+[2024-10-17 12:40:06] [10720] ფუნქცია get_distance_between_station_and_earthquake წარმატებით დასრულდა.
