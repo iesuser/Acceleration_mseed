@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE earthquake SYSTEM "earthquake.dtd">
+<earthquake id="ies2024hpwg" lat="41.2039" lon="43.8708" depth="0" mag="1.88041" year="2024" month="4" day="18" hour="7" minute="1"  second="29" timezone="GMT" locstring="ies2024hpwg / 41.20391845703125 / 43.870750427246094" created="1713424254"/>
