@@ -1,4 +1,3 @@
-#!/home/sysop/Desktop/work/attenuation_plotting/virt_env/obspyenv/bin/python3
 import xml.etree.ElementTree as ET
 import sys, subprocess, glob, os
 from obspy.geodetics.base import gps2dist_azimuth
@@ -8,7 +7,7 @@ from datetime import datetime, timedelta
 from print_acc import print_wave_and_acc
 from print_and_log import print_and_log
 
-acc_limit = 0.00001  # აჩქარების მაჩვენებლის ლიმიტი.
+acc_limit = 0.001  # აჩქარების მაჩვენებლის ლიმიტი.
 ip_address = "192.168.11.250"
 script_path = os.path.dirname(os.path.realpath(__file__))
 shakemaps_path = './shakemaps'
