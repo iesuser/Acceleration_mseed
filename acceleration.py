@@ -139,19 +139,20 @@ def collect_acceleration():
                     continue
 
         # **შენახვა Accelerations.txt ფაილში**
-        final_txt_path = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}/Accelerations.txt'
-        with open(final_txt_path, "w") as file:
+        WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}'
+        os.makedirs(WORK_DIR, exist_ok=True)
+        acceleration_data_txt_path = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}/Accelerations.txt'
+        with open(acceleration_data_txt_path, "w") as file:
+            file.write(f"{ORIGIN_TIME}\n")
             file.write("Station, Max G\n")
             file.write("\n".join(acceleration_data))
 
-        logger.info(f"Accelerations.txt ფაილი შეინახა: {final_txt_path}")
+        logger.info(f"Accelerations.txt ფაილი შეინახა: {acceleration_data_txt_path}")
 
         # **შენახვა More_G_Threshold.txt ფაილში**
-        WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}'
-        os.makedirs(WORK_DIR, exist_ok=True)
         logger.debug(f"ქვედირექტორია შექმნილია ან უკვე არსებობს: {WORK_DIR}")
-        final_txt_path = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}/More_G_Threshold.txt'
-        with open(final_txt_path, "w") as file:
+        more_g_threshold_txt_path = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}/More_G_Threshold.txt'
+        with open(more_g_threshold_txt_path, "w") as file:
             file.write(f"{ORIGIN_TIME}\n")
             file.write("Stations, Max G\n")
             for station_key, data in more_g_threshold.items():
@@ -161,7 +162,7 @@ def collect_acceleration():
                 else:
                     logger.info(f"სადგური {station_key} არ გადაცდა ზღვარს, არ შეინახა.")
 
-        logger.info(f"More_G_Threshold.txt ფაილი შეინახა: {final_txt_path}")
+        logger.info(f"More_G_Threshold.txt ფაილი შეინახა: {more_g_threshold_txt_path}")
     
     except Exception as err:
         logger.exception("მოულოდნელი შეცდომა collect_acceleration ფუნქციაში: " + str(err))
