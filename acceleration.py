@@ -37,7 +37,7 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(rotating_handler)
 
 # სეისმური სადგურის მონაცემების მისაღები სერვერი
-FDSN_CLIENT = Client("http://192.168.11.250:8080")
+FDSN_CLIENT = Client("http://10.0.0.249:8080")
 
 # მონაცემების პარამეტრები
 NETWORK = 'GO'
@@ -45,13 +45,14 @@ STATIONS = '*'
 LOCATION = '*'
 CHANNEL = 'HN*'
 UNIT = "ACC"
-G_TRASHOLD = 0.001  # G ერთეულში
+G_THRESHOLD = 0.001  # G ერთეულში
 
 def collect_acceleration():
     try:
         # სადგურების ინფრომაციის წამოღება
         inventory = FDSN_CLIENT.get_stations(network=NETWORK, station=STATIONS, location=LOCATION, channel=CHANNEL, starttime=START_TIME, endtime=END_TIME, level="response")
-        acceleration_data = {}  # initialize dictionary
+        more_g_threshold = {}  # initialize dictionary
+        acceleration_data = []  # სიის შექმნა აჩქარების შესანახად
 
         for network in inventory:
             for station in network:
@@ -85,20 +86,22 @@ def collect_acceleration():
                         g_acc = tr.data / 9.81  # აჩქარების გადაყვანა g ერთეულში
                         max_g = np.max(np.abs(g_acc))
                         logger.debug(f"სადგურზე {station.code} დაფიქსირდა აჩქარება G: {max_g}")
+
                         # ვამატებთ მონაცემს საბოლოო სიაში
+                        acceleration_data.append(f"{tr.stats.network}_{tr.stats.station}_{tr.stats.channel}, {max_g}")
                         key = f"{tr.stats.network}_{tr.stats.station}_{tr.stats.channel}"
                         value = (max_g)
 
                         # If key doesn't exist, create a new dict
-                        if key not in acceleration_data:
-                            acceleration_data[key] = {
+                        if key not in more_g_threshold:
+                            more_g_threshold[key] = {
                                 "values": [],
                                 "exported": False
                             }
 
-                        acceleration_data[key]["values"].append(value)
+                        more_g_threshold[key]["values"].append(value)
 
-                        if max_g > G_TRASHOLD and not export_station_data:
+                        if max_g > G_THRESHOLD and not export_station_data:
                             export_station_data = True
 
                     if export_station_data:
@@ -121,7 +124,7 @@ def collect_acceleration():
                         for tr in st:
                             max_g_tr = np.max(np.abs(tr.data / 9.81))
                             exported_key = f"{tr.stats.network}_{tr.stats.station}_{tr.stats.channel}"
-                            acceleration_data[exported_key]["exported"] = True
+                            more_g_threshold[exported_key]["exported"] = True
 
                             try:
                                 filename = f'{ORIGIN_TIME}_{round(max_g_tr, 5)}_{tr.stats.network}_{tr.stats.station}_{tr.stats.channel}'
@@ -135,22 +138,30 @@ def collect_acceleration():
                     logger.warning(f"შეცდომა სადგურის ({station.code}) მონაცემების დამუშავებისას: {err}")
                     continue
 
-        # **შენახვა Acceleration.txt ფაილში**
+        # **შენახვა Accelerations.txt ფაილში**
+        final_txt_path = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}/Accelerations.txt'
+        with open(final_txt_path, "w") as file:
+            file.write("Station, Max G\n")
+            file.write("\n".join(acceleration_data))
+
+        logger.info(f"Accelerations.txt ფაილი შეინახა: {final_txt_path}")
+
+        # **შენახვა More_G_Threshold.txt ფაილში**
         WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}'
         os.makedirs(WORK_DIR, exist_ok=True)
         logger.debug(f"ქვედირექტორია შექმნილია ან უკვე არსებობს: {WORK_DIR}")
-        final_txt_path = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}/Acceleration.txt'
+        final_txt_path = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}/More_G_Threshold.txt'
         with open(final_txt_path, "w") as file:
             file.write(f"{ORIGIN_TIME}\n")
             file.write("Stations, Max G\n")
-            for station_key, data in acceleration_data.items():
+            for station_key, data in more_g_threshold.items():
                 if data["exported"]:
                     for value in data["values"]:
                         file.write(f"{station_key}, {value:.6f}\n")
                 else:
                     logger.info(f"სადგური {station_key} არ გადაცდა ზღვარს, არ შეინახა.")
 
-        logger.info(f"Acceleration.txt ფაილი შეინახა: {final_txt_path}")
+        logger.info(f"More_G_Threshold.txt ფაილი შეინახა: {final_txt_path}")
     
     except Exception as err:
         logger.exception("მოულოდნელი შეცდომა collect_acceleration ფუნქციაში: " + str(err))
