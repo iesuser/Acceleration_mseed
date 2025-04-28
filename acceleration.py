@@ -39,18 +39,63 @@ logger.addHandler(rotating_handler)
 # სეისმური სადგურის მონაცემების მისაღები სერვერი
 FDSN_CLIENT = Client("http://10.0.0.249:8080")
 
+STATION_DICT = {'ALIA':'ALIG', 'TRLT': 'TRLT', 'EMLK':'EMLK', 'TBLG':'TBLG', 'LPNA':'LPNG', 'MUGA': 'MUGD'}
+EXPORT_ST_VELOCITY = set()
+CHANNEL_VEL = 'HH*'
+UNIT_VEL = "VEL"
+
 # მონაცემების პარამეტრები
 NETWORK = 'GO'
 STATIONS = '*'
 LOCATION = '*'
-CHANNEL = 'HN*'
-UNIT = "ACC"
+CHANNEL_ACC = 'HN*'
+UNIT_ACC = "ACC"
 G_THRESHOLD = 0.001  # G ერთეულში
+
+def export_velocity():
+    if EXPORT_ST_VELOCITY:
+        inventory_vel = FDSN_CLIENT.get_stations(network=NETWORK, station=STATIONS, location=LOCATION, channel=CHANNEL_VEL, starttime=START_TIME, endtime=END_TIME, level="response")
+        for station in EXPORT_ST_VELOCITY:
+            try:
+                # ვიღებთ ტალღის ფორმებს
+                st_vel = FDSN_CLIENT.get_waveforms(NETWORK, station, LOCATION, CHANNEL_VEL, START_TIME, END_TIME)
+                if len(st_vel) == 0:
+                    logger.debug(f"არ არსებობს ჩანაწერი სადგურისთვის: {station}")
+                    continue
+
+                # ვიღებთ სადგურის შესაბამის დეტალებს
+                st_vel_inv = inventory_vel.select(network=NETWORK, station=station, channel=CHANNEL_VEL)
+
+                if not st_vel_inv or len(st_vel_inv) == 0:
+                    logger.warning(f"არ არის შესაბამისი response მონაცემები სადგურისთვის {station}. ვტოვებთ...")
+                    continue
+
+                # ვშლით ინსტრუმენტულ პასუხს (response) და ვცვლით ერთეულს
+                st_vel.remove_response(inventory=st_vel_inv, output=UNIT_VEL.upper(), water_level=0.0)
+                
+                WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}/{station}'
+                os.makedirs(WORK_DIR, exist_ok=True)
+                logger.debug(f"ქვედირექტორია შექმნილია ან უკვე არსებობს: {WORK_DIR}")
+
+                for tr in st_vel:
+                    try:
+                        filename = f'{ORIGIN_TIME}_{tr.stats.network}_{tr.stats.station}_{tr.stats.channel}'
+                        st_file_path = os.path.join(WORK_DIR, f'{filename}.ascii')
+                        logger.debug(f"ინახება: {st_file_path}")
+                        tr.write(st_file_path, format='TSPAIR')
+                    except Exception as err:
+                        logger.exception(f"შეცდომა ჩანაწერის ({tr.stats.station}) შენახვისას: {err}")
+
+            except Exception as err:
+                logger.warning(f"შეცდომა სადგურის ({station}) მონაცემების დამუშავებისას: {err}")
+                continue
+    else:
+        logger.warning("არცერთი სადგურიდან არ ვიწერთ სიჩქარის მონაცემებს")
 
 def collect_acceleration():
     try:
         # სადგურების ინფრომაციის წამოღება
-        inventory = FDSN_CLIENT.get_stations(network=NETWORK, station=STATIONS, location=LOCATION, channel=CHANNEL, starttime=START_TIME, endtime=END_TIME, level="response")
+        inventory = FDSN_CLIENT.get_stations(network=NETWORK, station=STATIONS, location=LOCATION, channel=CHANNEL_ACC, starttime=START_TIME, endtime=END_TIME, level="response")
         more_g_threshold = {}  # initialize dictionary
         acceleration_data = []  # სიის შექმნა აჩქარების შესანახად
 
@@ -63,21 +108,21 @@ def collect_acceleration():
                         continue
 
                     # ვიღებთ ტალღის ფორმებს
-                    st = FDSN_CLIENT.get_waveforms(NETWORK, station.code, LOCATION, CHANNEL, START_TIME, END_TIME)
+                    st = FDSN_CLIENT.get_waveforms(NETWORK, station.code, LOCATION, CHANNEL_ACC, START_TIME, END_TIME)
 
                     if len(st) == 0:
                         logger.debug(f"არ არსებობს ჩანაწერი სადგურისთვის: {station.code}")
                         continue
 
                     # ვიღებთ სადგურის შესაბამის დეტალებს
-                    station_inv = inventory.select(network=NETWORK, station=station.code, channel=CHANNEL)
+                    station_inv = inventory.select(network=NETWORK, station=station.code, channel=CHANNEL_ACC)
 
                     if not station_inv or len(station_inv) == 0:
                         logger.warning(f"არ არის შესაბამისი response მონაცემები სადგურისთვის {station.code}. ვტოვებთ...")
                         continue
 
                     # ვშლით ინსტრუმენტულ პასუხს (response) და ვცვლით ერთეულს
-                    st.remove_response(inventory=station_inv, output=UNIT.upper(), water_level=0.0)
+                    st.remove_response(inventory=station_inv, output=UNIT_ACC.upper(), water_level=0.0)
 
                     export_station_data = False  # მონაცემების შენახვის საჭიროება
                     max_g = 0.0  # მაქსიმალური აჩქარების მნიშვნელობა
@@ -103,6 +148,8 @@ def collect_acceleration():
 
                         if max_g > G_THRESHOLD and not export_station_data:
                             export_station_data = True
+                            if STATION_DICT[tr.stats.station]:
+                                EXPORT_ST_VELOCITY.add(STATION_DICT[tr.stats.station])
 
                     if export_station_data:
                         WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}/{station.code}'
@@ -122,12 +169,11 @@ def collect_acceleration():
                             stream.plot(outfile=plot_path, format="png")
 
                         for tr in st:
-                            max_g_tr = np.max(np.abs(tr.data / 9.81))
                             exported_key = f"{tr.stats.network}_{tr.stats.station}_{tr.stats.channel}"
                             more_g_threshold[exported_key]["exported"] = True
 
                             try:
-                                filename = f'{ORIGIN_TIME}_{round(max_g_tr, 5)}_{tr.stats.network}_{tr.stats.station}_{tr.stats.channel}'
+                                filename = f'{ORIGIN_TIME}_{tr.stats.network}_{tr.stats.station}_{tr.stats.channel}'
                                 st_file_path = os.path.join(WORK_DIR, f'{filename}.ascii')
                                 logger.debug(f"ინახება: {st_file_path}")
                                 tr.write(st_file_path, format='TSPAIR')
@@ -171,5 +217,6 @@ def collect_acceleration():
 if __name__ == "__main__":
     try:
         collect_acceleration()
+        export_velocity()
     except Exception as err:
         logger.exception("მოულოდნელი შეცდომა სკრიპტის შესრულებისას: " + str(err))
