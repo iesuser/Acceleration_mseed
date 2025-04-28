@@ -39,7 +39,7 @@ logger.addHandler(rotating_handler)
 # სეისმური სადგურის მონაცემების მისაღები სერვერი
 FDSN_CLIENT = Client("http://10.0.0.249:8080")
 
-STATION_DICT = {'ALIA':'ALIG', 'TRLT': 'TRLT', 'EMLK':'EMLK', 'TBLG':'TBLG', 'LPNA':'LPNG', 'MUGA': 'MUGD'}
+STATION_DICT = {'AKHA':'AKHN', 'ALIA':'ALIG', 'KHMA':'KHMG', 'LGDA':'LGDN', 'LPNA':'LPNG', 'MUGA':'MUGD', 'SHTA':'SHTL', 'VSHA':'VSHL'}
 EXPORT_ST_VELOCITY = set()
 CHANNEL_VEL = 'HH*'
 UNIT_VEL = "VEL"
@@ -148,8 +148,10 @@ def collect_acceleration():
 
                         if max_g > G_THRESHOLD and not export_station_data:
                             export_station_data = True
-                            if STATION_DICT[tr.stats.station]:
+                            if tr.stats.station in STATION_DICT:
                                 EXPORT_ST_VELOCITY.add(STATION_DICT[tr.stats.station])
+                            else:
+                                EXPORT_ST_VELOCITY.add(tr.stats.station)
 
                     if export_station_data:
                         WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}/{station.code}'
