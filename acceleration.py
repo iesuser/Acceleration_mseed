@@ -40,6 +40,7 @@ logger.addHandler(rotating_handler)
 FDSN_CLIENT = Client("http://10.0.0.249:8080")
 
 STATION_DICT = {'AKHA':'AKHN', 'ALIA':'ALIG', 'KHMA':'KHMG', 'LGDA':'LGDN', 'LPNA':'LPNG', 'MUGA':'MUGD', 'SHTA':'SHTL', 'VSHA':'VSHL'}
+REVERSED_STATION_DICT = {value: key for key, value in STATION_DICT.items()}
 EXPORT_ST_VELOCITY = set()
 CHANNEL_VEL = 'HH*'
 UNIT_VEL = "VEL"
@@ -52,40 +53,68 @@ CHANNEL_ACC = 'HN*'
 UNIT_ACC = "ACC"
 G_THRESHOLD = 0.001  # G ერთეულში
 
+# ASCII ფაილის შენახვის ფუნქცია სწორი ჰედერით
+def write_trace_as_ascii(tr, file_path, unit_code="VEL"):
+    unit_map = {
+        "VEL": "m/s",
+        "ACC": "m/s**2"
+    }
+    unit_str = unit_map.get(unit_code.upper(), unit_code)
+
+    starttime = tr.stats.starttime
+    sampling_rate = tr.stats.sampling_rate
+    npts = tr.stats.npts
+    channel = tr.stats.channel
+    network = tr.stats.network
+    original_station = REVERSED_STATION_DICT.get(tr.stats.station, tr.stats.station)
+    location = tr.stats.location or ""
+    filename_id = f"{network}_{original_station}_{location}_{channel}_D".strip("_")
+
+    # ჰედერის და მონაცემების ჩაწერა
+    with open(file_path, "w") as f:
+        header = (
+            f"TIMESERIES {filename_id}, {npts} samples, {int(sampling_rate)} sps, "
+            f"{starttime.strftime('%Y-%m-%dT%H:%M:%S.%f')}, TSPAIR, FLOAT, {unit_str}"
+        )
+        f.write(header + "\n")
+
+        delta = 1.0 / sampling_rate
+        for i, amp in enumerate(tr.data):
+            current_time = starttime + i * delta
+            f.write(f"{current_time.strftime('%Y-%m-%dT%H:%M:%S.%f')}  {amp:+.10e}\n")
+
+# სიჩქარის მონაცემების ექსპორტის ფუნქცია
 def export_velocity():
     if EXPORT_ST_VELOCITY:
         inventory_vel = FDSN_CLIENT.get_stations(network=NETWORK, station=STATIONS, location=LOCATION, channel=CHANNEL_VEL, starttime=START_TIME, endtime=END_TIME, level="response")
         for station in EXPORT_ST_VELOCITY:
             try:
-                # ვიღებთ ტალღის ფორმებს
                 st_vel = FDSN_CLIENT.get_waveforms(NETWORK, station, LOCATION, CHANNEL_VEL, START_TIME, END_TIME)
                 if len(st_vel) == 0:
                     logger.debug(f"არ არსებობს ჩანაწერი სადგურისთვის: {station}")
                     continue
 
-                # ვიღებთ სადგურის შესაბამის დეტალებს
                 st_vel_inv = inventory_vel.select(network=NETWORK, station=station, channel=CHANNEL_VEL)
 
                 if not st_vel_inv or len(st_vel_inv) == 0:
                     logger.warning(f"არ არის შესაბამისი response მონაცემები სადგურისთვის {station}. ვტოვებთ...")
                     continue
 
-                # ვშლით ინსტრუმენტულ პასუხს (response) და ვცვლით ერთეულს
                 st_vel.remove_response(inventory=st_vel_inv, output=UNIT_VEL.upper(), water_level=0.0)
-                
-                WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}/{station}'
+
+                original_station = REVERSED_STATION_DICT.get(station, station)
+                WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}/{original_station}'
                 os.makedirs(WORK_DIR, exist_ok=True)
                 logger.debug(f"ქვედირექტორია შექმნილია ან უკვე არსებობს: {WORK_DIR}")
 
                 for tr in st_vel:
                     try:
-                        filename = f'{ORIGIN_TIME}_{tr.stats.network}_{tr.stats.station}_{tr.stats.channel}'
+                        filename = f'{ORIGIN_TIME}_{tr.stats.network}_{original_station}_{tr.stats.channel}'
                         st_file_path = os.path.join(WORK_DIR, f'{filename}.ascii')
                         logger.debug(f"ინახება: {st_file_path}")
-                        tr.write(st_file_path, format='TSPAIR')
+                        write_trace_as_ascii(tr, st_file_path, unit_code=UNIT_VEL.upper())
                     except Exception as err:
-                        logger.exception(f"შეცდომა ჩანაწერის ({tr.stats.station}) შენახვისას: {err}")
-
+                        logger.exception(f"შეცდომა ჩანაწერის ({original_station}) შენახვისას: {err}")
             except Exception as err:
                 logger.warning(f"შეცდომა სადგურის ({station}) მონაცემების დამუშავებისას: {err}")
                 continue
@@ -178,7 +207,7 @@ def collect_acceleration():
                                 filename = f'{ORIGIN_TIME}_{tr.stats.network}_{tr.stats.station}_{tr.stats.channel}'
                                 st_file_path = os.path.join(WORK_DIR, f'{filename}.ascii')
                                 logger.debug(f"ინახება: {st_file_path}")
-                                tr.write(st_file_path, format='TSPAIR')
+                                write_trace_as_ascii(tr, st_file_path, unit_code=UNIT_ACC.upper())  # e.g. "VEL" or "ACC"
                             except Exception as err:
                                 logger.exception(f"შეცდომა ჩანაწერის ({tr.stats.station}) შენახვისას: {err}")
                                 
