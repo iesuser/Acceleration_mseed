@@ -47,7 +47,7 @@ CHANNEL_VEL = 'HH*'
 UNIT_VEL = "VEL"
 
 MORE_G_THRESHOLD = {}
-STANDALONE_STATIONS = ['BTNK', 'SC07', 'S007', 'S185', 'S186', 'SEAG']
+STANDALONE_STATIONS = ['BTNK', 'SC07', 'S007', 'S185', 'S186', 'SEAG', 'SHTB']
 
 # მონაცემების პარამეტრები
 NETWORK = 'GO'
@@ -107,7 +107,7 @@ def export_velocity():
                 st_vel.remove_response(inventory=st_vel_inv, output=UNIT_VEL.upper(), water_level=0.0)
 
                 original_station = REVERSED_STATION_DICT.get(station, station)
-                WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}/{original_station}'
+                WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{ORIGIN_TIME}/{original_station}'
                 os.makedirs(WORK_DIR, exist_ok=True)
                 logger.debug(f"ქვედირექტორია შექმნილია ან უკვე არსებობს: {WORK_DIR}")
 
@@ -196,7 +196,7 @@ def collect_acceleration():
                                 EXPORT_ST_VELOCITY.add(tr.stats.station)
 
                     if export_station_data:
-                        WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}/{station.code}'
+                        WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{ORIGIN_TIME}/{station.code}'
                         os.makedirs(WORK_DIR, exist_ok=True)
                         logger.debug(f"ქვედირექტორია შექმნილია ან უკვე არსებობს: {WORK_DIR}")
 
@@ -228,33 +228,35 @@ def collect_acceleration():
                     logger.warning(f"შეცდომა სადგურის ({station.code}) მონაცემების დამუშავებისას: {err}")
                     continue
 
-        WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}'
-        os.makedirs(WORK_DIR, exist_ok=True)
+        # WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{ORIGIN_TIME}'
+        # os.makedirs(WORK_DIR, exist_ok=True)
 
-        acceleration_data_txt_path = os.path.join(WORK_DIR, "Accelerations.txt")
-        with open(acceleration_data_txt_path, "w") as file:
-            file.write(f"{ORIGIN_TIME}\n")
-            file.write("Station, Max G\n")
-            file.write("\n".join(acceleration_data))
+        # acceleration_data_txt_path = os.path.join(WORK_DIR, "Accelerations.txt")
+        # with open(acceleration_data_txt_path, "w") as file:
+        #     file.write(f"{ORIGIN_TIME}\n")
+        #     file.write("Station, Max G\n")
+        #     file.write("\n".join(acceleration_data))
 
-        logger.info(f"Accelerations.txt ფაილი შეინახა: {acceleration_data_txt_path}")
+        # logger.info(f"Accelerations.txt ფაილი შეინახა: {acceleration_data_txt_path}")
 
     except Exception as err:
         logger.exception("მოულოდნელი შეცდომა collect_acceleration ფუნქციაში: " + str(err))
 
 # More_G_Threshold.txt ფაილის შენახვა აქ
 def write_txt():
-    WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{NETWORK}/{ORIGIN_TIME}'
+    WORK_DIR = f'{TEMP_DIR}/{str(ORIGIN_TIME)[:4]}/{ORIGIN_TIME}'
     os.makedirs(WORK_DIR, exist_ok=True)
-    more_g_threshold_txt_path = os.path.join(WORK_DIR, "More_G_Threshold.txt")
+    more_g_threshold_txt_path = os.path.join(WORK_DIR, "g_accelerations.txt")
     with open(more_g_threshold_txt_path, "w") as file:
         file.write(f"{ORIGIN_TIME}\n")
-        file.write("Station, Max G (from ACC), Max G (from VEL->ACC)\n")
+        # file.write("Station, Max g (from ACC), Max g (from VEL->ACC)\n")
+        file.write("Station, Max g (from ACC/9.81)\n")
         for station_key, data in MORE_G_THRESHOLD.items():
             if data["exported"]:
                 max_acc = max(data["values"]) if data["values"] else 0
-                max_acc_from_vel = max(data.get("acc_from_vel") or [0.0])
-                file.write(f"{station_key}, {max_acc:.6f}, {max_acc_from_vel:.6f}\n")
+                # max_acc_from_vel = max(data.get("acc_from_vel") or [0.0])
+                # file.write(f"{station_key}, {max_acc:.6f}, {max_acc_from_vel:.6f}\n")
+                file.write(f"{station_key}, {max_acc:.6f} g\n")
             else:
                 logger.info(f"სადგური {station_key} არ გადაცდა ზღვარს, არ შეინახა.")
 
