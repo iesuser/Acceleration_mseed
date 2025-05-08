@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!DOCTYPE earthquake SYSTEM "earthquake.dtd">
-<earthquake id="ies2025erlx" lat="42.3918" lon="45.1264" depth="0" mag="3.9422" year="2025" month="3" day="8" hour="11" minute="28"  second="26" timezone="GMT" locstring="ies2025erlx / 42.39183044433594 / 45.12641906738281" created="1741434087"/>
