@@ -9,10 +9,13 @@ SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # მიწისძვრის დრო, რომელიც გადაეცემა როგორც არგუმენტი
 # ORIGIN_TIME = UTCDateTime(sys.argv[1])
-ORIGIN_TIME = UTCDateTime("2025-03-08T11:28:25.120")
+# ORIGIN_TIME = UTCDateTime("2025-03-08T11:28:25.120")
 
-START_TIME = ORIGIN_TIME - 300  # 300 წამით ადრე
-END_TIME = ORIGIN_TIME + 300    # 300 წამით გვიან
+# START_TIME = ORIGIN_TIME - 300  # 300 წამით ადრე
+START_TIME = UTCDateTime("2025-03-08T00:00:00.000")
+# END_TIME = ORIGIN_TIME + 300    # 300 წამით გვიან
+END_TIME = UTCDateTime("2025-03-09T00:00:00.000")
+
 
 # დროებითი ფაილების დირექტორია
 TEMP_DIR = os.path.join(SCRIPT_PATH, "export")
@@ -40,9 +43,9 @@ FDSN_CLIENT = Client("IRIS")
 
 # მონაცემების პარამეტრები
 NETWORK = 'GO'
-STATIONS = '*'
+STATIONS = 'MZEG'
 LOCATION = '*'
-CHANNEL = 'HN*'
+CHANNEL = 'HNZ'
 
 def export_mseed():
     try:

@@ -11,7 +11,6 @@ END_TIME = ORIGIN_TIME + 180  # 180 წამით გვიან
 
 station_code = '*'
 
-
 st_inventory = FDSN_CLIENT.get_stations(network='GO', station=station_code, location='*', channel='HN*', starttime=START_TIME, endtime=END_TIME, level="response")
 
 # ვიღებთ ტალღის ფორმებს
